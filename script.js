@@ -7,29 +7,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleCameraButton = document.getElementById('toggleCamera');
 
     const navButtons = document.querySelectorAll('.nav-button');
-    const houseView = document.querySelector('.house-view');
-    const floorLayouts = document.querySelectorAll('.floor-layout');
-    const houseFacade = document.getElementById('outside');
+    const houseView = document.querySelector('.house-view'); // Батьківський контейнер для всіх поверхів/фасаду
+    const allViews = document.querySelectorAll('.house-facade, .floor-layout'); // Всі можливі види (фасад + поверхи)
 
     const addItemButton = document.getElementById('addItem');
     const itemTypeSelect = document.getElementById('itemType');
     const itemNameInput = document.getElementById('itemName');
 
-    let currentFloor = 'outside'; // Початковий поверх - зовнішній вигляд
+    let currentFloorId = 'outside'; // Початковий поверх - зовнішній вигляд
 
     // Функція для перемикання поверхів
     function switchFloor(targetFloorId) {
         // Приховуємо всі поверхи та фасад
-        floorLayouts.forEach(floor => {
-            floor.classList.remove('current-floor');
+        allViews.forEach(view => {
+            view.classList.remove('current-floor');
+            view.style.display = 'none'; // Додаємо display: none для повного приховування
         });
-        houseFacade.classList.remove('current-floor');
 
         // Показуємо потрібний поверх або фасад
         const targetElement = document.getElementById(targetFloorId);
         if (targetElement) {
+            targetElement.style.display = 'flex'; // Використовуємо flex, оскільки floor-layout flex
             targetElement.classList.add('current-floor');
-            currentFloor = targetFloorId;
+            currentFloorId = targetFloorId;
         }
     }
 
@@ -83,14 +83,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Пошук поточного активного поверху
-        const currentActiveFloor = document.querySelector('.floor-layout.current-floor');
-        if (!currentActiveFloor) {
-            alert('Будь ласка, оберіть поверх, щоб додати пристрій.');
+        // Використовуємо currentFloorId для визначення поточного відображуваного поверху
+        const currentActiveFloorElement = document.getElementById(currentFloorId);
+
+        if (!currentActiveFloorElement || currentFloorId === 'outside') {
+            alert('Будь ласка, оберіть внутрішній поверх (1-5) для додавання пристрою.');
             return;
         }
 
         // Знаходимо всі місця для пристроїв на поточному поверсі
-        const itemPlaceholders = currentActiveFloor.querySelectorAll('.item-placeholder');
+        const itemPlaceholders = currentActiveFloorElement.querySelectorAll('.item-placeholder');
 
         if (itemPlaceholders.length === 0) {
             alert('На цьому поверсі немає місць для додавання пристроїв.');
@@ -100,23 +102,33 @@ document.addEventListener('DOMContentLoaded', () => {
         // Створення нового елемента
         const newItemDiv = document.createElement('div');
         newItemDiv.classList.add('smart-item', itemType);
+
+        let itemDisplayName = '';
+        switch (itemType) {
+            case 'light': itemDisplayName = 'Світло'; break;
+            case 'thermostat': itemDisplayName = 'Термостат'; break;
+            case 'speaker': itemDisplayName = 'Колонка'; break;
+            case 'tv': itemDisplayName = 'Телевізор'; break;
+            default: itemDisplayName = itemType;
+        }
+
         newItemDiv.innerHTML = `
-            <span>${itemName} (${itemType === 'light' ? 'Світло' : itemType === 'thermostat' ? 'Термостат' : itemType === 'speaker' ? 'Колонка' : itemType === 'tv' ? 'Телевізор' : itemType})</span>
+            <span>${itemName} (${itemDisplayName})</span>
             <button data-action="toggle">Увімкнути/Вимкнути</button>
         `;
 
         // Додаємо обробник подій для кнопки
         const toggleButton = newItemDiv.querySelector('button');
         toggleButton.addEventListener('click', () => {
-            alert(`Керування пристроєм: ${itemName} (${itemType})`);
+            alert(`Керування пристроєм: ${itemName} (${itemDisplayName})`);
             // Тут можна додати більш складну логіку керування
         });
 
         // Додаємо новий елемент до першого доступного "placeholder"
         let added = false;
         for (const placeholder of itemPlaceholders) {
-            // Перевіряємо, чи є в placeholder вже елементи. Якщо немає, додаємо.
-            // Можна додати більш складну логіку для вибору місця
+            // Перевіряємо, чи є в placeholder вже елементи. Якщо ні, додаємо.
+            // Можна додати більш складну логіку для вибору місця, наприклад, кімнати
             if (placeholder.children.length === 0) {
                 placeholder.appendChild(newItemDiv);
                 added = true;
