@@ -1,0 +1,134 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const mainDoor = document.getElementById('mainDoor');
+    const toggleDoorButton = document.getElementById('toggleDoor');
+    const cameraIcon = document.getElementById('cameraIcon');
+    const cameraFeed = document.getElementById('cameraFeed');
+    const cameraVideo = document.getElementById('cameraVideo');
+    const toggleCameraButton = document.getElementById('toggleCamera');
+
+    const navButtons = document.querySelectorAll('.nav-button');
+    const houseView = document.querySelector('.house-view');
+    const floorLayouts = document.querySelectorAll('.floor-layout');
+    const houseFacade = document.getElementById('outside');
+
+    const addItemButton = document.getElementById('addItem');
+    const itemTypeSelect = document.getElementById('itemType');
+    const itemNameInput = document.getElementById('itemName');
+
+    let currentFloor = 'outside'; // Початковий поверх - зовнішній вигляд
+
+    // Функція для перемикання поверхів
+    function switchFloor(targetFloorId) {
+        // Приховуємо всі поверхи та фасад
+        floorLayouts.forEach(floor => {
+            floor.classList.remove('current-floor');
+        });
+        houseFacade.classList.remove('current-floor');
+
+        // Показуємо потрібний поверх або фасад
+        const targetElement = document.getElementById(targetFloorId);
+        if (targetElement) {
+            targetElement.classList.add('current-floor');
+            currentFloor = targetFloorId;
+        }
+    }
+
+    // Ініціалізація: показати зовнішній вигляд при завантаженні сторінки
+    switchFloor('outside');
+
+    // Перемикання дверей
+    toggleDoorButton.addEventListener('click', () => {
+        mainDoor.classList.toggle('open');
+        if (mainDoor.classList.contains('open')) {
+            toggleDoorButton.textContent = 'Закрити Двері';
+        } else {
+            toggleDoorButton.textContent = 'Відкрити Двері';
+        }
+    });
+
+    // Перемикання камери
+    toggleCameraButton.addEventListener('click', () => {
+        if (cameraFeed.style.display === 'block') {
+            cameraFeed.style.display = 'none';
+            cameraVideo.pause();
+            toggleCameraButton.textContent = 'Увімкнути Камеру';
+        } else {
+            cameraFeed.style.display = 'block';
+            cameraVideo.play();
+            toggleCameraButton.textContent = 'Вимкнути Камеру';
+        }
+    });
+
+    cameraIcon.addEventListener('click', () => {
+        // Та ж функціональність, що й у кнопки
+        toggleCameraButton.click();
+    });
+
+    // Навігація по поверхах
+    navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const floorId = button.dataset.floor;
+            switchFloor(floorId);
+        });
+    });
+
+    // Додавання "розумних" речей
+    addItemButton.addEventListener('click', () => {
+        const itemType = itemTypeSelect.value;
+        const itemName = itemNameInput.value.trim();
+
+        if (!itemName) {
+            alert('Будь ласка, введіть назву для пристрою.');
+            return;
+        }
+
+        // Пошук поточного активного поверху
+        const currentActiveFloor = document.querySelector('.floor-layout.current-floor');
+        if (!currentActiveFloor) {
+            alert('Будь ласка, оберіть поверх, щоб додати пристрій.');
+            return;
+        }
+
+        // Знаходимо всі місця для пристроїв на поточному поверсі
+        const itemPlaceholders = currentActiveFloor.querySelectorAll('.item-placeholder');
+
+        if (itemPlaceholders.length === 0) {
+            alert('На цьому поверсі немає місць для додавання пристроїв.');
+            return;
+        }
+
+        // Створення нового елемента
+        const newItemDiv = document.createElement('div');
+        newItemDiv.classList.add('smart-item', itemType);
+        newItemDiv.innerHTML = `
+            <span>${itemName} (${itemType === 'light' ? 'Світло' : itemType === 'thermostat' ? 'Термостат' : itemType === 'speaker' ? 'Колонка' : itemType === 'tv' ? 'Телевізор' : itemType})</span>
+            <button data-action="toggle">Увімкнути/Вимкнути</button>
+        `;
+
+        // Додаємо обробник подій для кнопки
+        const toggleButton = newItemDiv.querySelector('button');
+        toggleButton.addEventListener('click', () => {
+            alert(`Керування пристроєм: ${itemName} (${itemType})`);
+            // Тут можна додати більш складну логіку керування
+        });
+
+        // Додаємо новий елемент до першого доступного "placeholder"
+        let added = false;
+        for (const placeholder of itemPlaceholders) {
+            // Перевіряємо, чи є в placeholder вже елементи. Якщо немає, додаємо.
+            // Можна додати більш складну логіку для вибору місця
+            if (placeholder.children.length === 0) {
+                placeholder.appendChild(newItemDiv);
+                added = true;
+                break;
+            }
+        }
+
+        if (!added) {
+            alert('Всі місця для пристроїв на цьому поверсі зайняті. Створіть нову кімнату або приберіть існуючі пристрої.');
+            return;
+        }
+
+        itemNameInput.value = ''; // Очистити поле введення
+    });
+});
