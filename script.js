@@ -1,406 +1,398 @@
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f7f6;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const mainDoor = document.getElementById('mainDoor');
+    const doorStatus = document.getElementById('doorStatus'); // Елемент для відображення статусу дверей
+    const openDoorButton = document.getElementById('openDoorButton');
+    const closeDoorButton = document.getElementById('closeDoorButton');
+    const repairDoorButton = document.getElementById('repairDoorButton');
 
-header {
-    background-color: #28a745;
-    color: white;
-    padding: 20px 0;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+    const cameraIcon = document.getElementById('cameraIcon');
+    const cameraFeed = document.getElementById('cameraFeed');
+    const cameraVideo = document.getElementById('cameraVideo');
+    const toggleCameraButton = document.getElementById('toggleCamera');
 
-.house-container {
-    display: flex;
-    flex-grow: 1;
-    padding: 20px;
-    gap: 20px;
-}
+    const navButtons = document.querySelectorAll('.nav-button');
+    const allViews = document.querySelectorAll('.house-facade, .floor-layout');
 
-.sidebar {
-    width: 250px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    flex-shrink: 0;
-}
+    const addItemButton = document.getElementById('addItem');
+    const itemTypeSelect = document.getElementById('itemType');
+    const itemNameInput = document.getElementById('itemName');
+    const selectRoomMessage = document.querySelector('.select-room-message');
 
-.sidebar h2 {
-    color: #28a745;
-    margin-top: 0;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
+    let currentFloorId = 'outside'; // Початковий поверх - зовнішній вигляд
+    let selectedRoom = null; // Змінна для зберігання поточної вибраної кімнати
+    let isDoorBroken = false; // Змінна для відстеження стану дверей (зламані чи ні)
 
-.sidebar button {
-    display: block;
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 10px;
-    border: none;
-    background-color: #e0e0e0;
-    color: #333;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
+    // Функція для оновлення статусу дверей на інтерфейсі
+    function updateDoorStatus(statusText, isBroken = false) {
+        doorStatus.textContent = statusText;
+        if (isBroken) {
+            mainDoor.classList.add('broken');
+            // Деактивуємо кнопки відкриття/закриття, якщо двері зламані
+            openDoorButton.disabled = true;
+            closeDoorButton.disabled = true;
+        } else {
+            mainDoor.classList.remove('broken');
+            openDoorButton.disabled = false;
+            closeDoorButton.disabled = false;
+        }
+        isDoorBroken = isBroken;
+    }
 
-.sidebar button:hover {
-    background-color: #d0d0d0;
-    transform: translateY(-2px);
-}
+    // Ініціалізуємо статус дверей при завантаженні
+    updateDoorStatus('Двері зачинені', false);
 
-.sidebar button#toggleDoor,
-.sidebar button#toggleCamera,
-.sidebar button#addItem {
-    background-color: #28a745;
-    color: white;
-}
+    // Функція для перемикання поверхів
+    function switchFloor(targetFloorId) {
+        allViews.forEach(view => {
+            view.classList.remove('current-floor');
+            view.style.display = 'none';
+        });
 
-.sidebar button#toggleDoor:hover,
-.sidebar button#toggleCamera:hover,
-.sidebar button#addItem:hover {
-    background-color: #218838;
-}
+        const targetElement = document.getElementById(targetFloorId);
+        if (targetElement) {
+            targetElement.style.display = 'flex';
+            targetElement.classList.add('current-floor');
+            currentFloorId = targetFloorId;
 
-.camera-feed {
-    margin-top: 20px;
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 5px;
-    display: none; /* Приховано за замовчуванням */
-    text-align: center;
-}
+            // Скидаємо вибрану кімнату при зміні поверху
+            if (selectedRoom) {
+                selectedRoom.classList.remove('selected-room');
+                selectedRoom = null;
+                selectRoomMessage.style.display = 'block'; // Показати повідомлення, що кімнату треба обрати
+            } else if (currentFloorId !== 'outside') {
+                selectRoomMessage.style.display = 'block';
+            } else {
+                selectRoomMessage.style.display = 'none';
+            }
+        }
+    }
 
-.camera-feed h3 {
-    margin-top: 0;
-    color: #555;
-    font-size: 1em;
-}
+    // Ініціалізація: показати зовнішній вигляд при завантаженні сторінки
+    switchFloor('outside');
 
-.camera-feed video {
-    width: 100%;
-    max-width: 200px;
-    border-radius: 5px;
-    background-color: black;
-}
+    // Керування дверима
+    openDoorButton.addEventListener('click', () => {
+        if (isDoorBroken) {
+            alert('Двері зламані! Спочатку їх потрібно відремонтувати.');
+            return;
+        }
+        mainDoor.classList.add('open');
+        updateDoorStatus('Двері відчинені');
+    });
 
-.house-view {
-    flex-grow: 1;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-    overflow: hidden; /* Для приховування неактивних поверхів */
-    position: relative;
-}
+    closeDoorButton.addEventListener('click', () => {
+        if (isDoorBroken) {
+            alert('Двері зламані! Спочатку їх потрібно відремонтувати.');
+            return;
+        }
+        mainDoor.classList.remove('open');
+        updateDoorStatus('Двері зачинені');
+    });
 
-/* Зовнішній вигляд будинку */
-.house-facade {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom, #a2d9ff, #7ad2ff); /* Небо */
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
-    display: flex; /* Змінено на flex для центрування */
-    justify-content: center;
-    align-items: flex-end;
-    flex-direction: column;
-    padding-bottom: 50px; /* Місце для трави */
-    box-sizing: border-box;
-    /* display: block; */ /* Повернено до block, якщо flex викликає проблеми */
-}
+    repairDoorButton.addEventListener('click', () => {
+        if (!isDoorBroken) {
+            alert('Двері не зламані. Можна зламати їх (для демонстрації) або продовжити.');
+            // Для демонстрації можна додати випадкове "зламати"
+            if (confirm('Двері не зламані. Зламати їх для демонстрації?')) {
+                updateDoorStatus('Двері зламані!', true);
+                alert('Двері зламалися!');
+            }
+            return;
+        }
+        updateDoorStatus('Двері відремонтовано. Зачинені.');
+        alert('Двері успішно відремонтовано!');
+    });
 
-.house-facade::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 50px;
-    background-color: #8bc34a; /* Трава */
-    z-index: 1;
-}
+    // Перемикання камери
+    toggleCameraButton.addEventListener('click', () => {
+        if (cameraFeed.style.display === 'block') {
+            cameraFeed.style.display = 'none';
+            cameraVideo.pause();
+            toggleCameraButton.textContent = 'Увімкнути Камеру';
+        } else {
+            cameraFeed.style.display = 'block';
+            cameraVideo.play();
+            toggleCameraButton.textContent = 'Вимкнути Камеру';
+        }
+    });
 
-.house-facade .house-name {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 2.5em;
-    font-weight: bold;
-    color: #4CAF50;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    z-index: 2;
-}
+    cameraIcon.addEventListener('click', () => {
+        toggleCameraButton.click();
+    });
 
-.door-wrapper {
-    position: relative;
-    width: 120px;
-    height: 180px;
-    background-color: #8b4513; /* Колір дверного отвору */
-    border-radius: 5px;
-    margin-bottom: 20px;
-    z-index: 2;
-    overflow: hidden;
-    border: 5px solid #6a340b;
-}
+    // Навігація по поверхах
+    navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const floorId = button.dataset.floor;
+            switchFloor(floorId);
+        });
+    });
 
-.door {
-    width: 100%;
-    height: 100%;
-    background-color: #a0522d; /* Колір дверей */
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform-origin: left;
-    transition: transform 0.5s ease-out;
-    border-left: 5px solid #8b4513;
-}
+    // Обробник кліку на кімнату
+    document.querySelector('.house-view').addEventListener('click', (event) => {
+        const clickedRoom = event.target.closest('.room');
 
-.door.open {
-    transform: perspective(1000px) rotateY(-90deg);
-}
+        if (clickedRoom) {
+            const currentActiveFloorElement = document.getElementById(currentFloorId);
+            if (currentActiveFloorElement && currentActiveFloorElement.contains(clickedRoom)) {
+                if (selectedRoom) {
+                    selectedRoom.classList.remove('selected-room');
+                }
+                clickedRoom.classList.add('selected-room');
+                selectedRoom = clickedRoom;
+                selectRoomMessage.style.display = 'none';
+            }
+        }
+    });
 
-.window {
-    position: absolute;
-    width: 80px;
-    height: 100px;
-    background-color: #add8e6; /* Світло-блакитний для вікна */
-    border: 3px solid #6a340b;
-    border-radius: 5px;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-    z-index: 2;
-}
+    // Додавання "розумних" речей
+    addItemButton.addEventListener('click', () => {
+        const itemType = itemTypeSelect.value;
+        const itemName = itemNameInput.value.trim();
 
-.window-left {
-    top: 100px;
-    left: 80px;
-}
+        if (!itemName) {
+            alert('Будь ласка, введіть назву для пристрою.');
+            return;
+        }
 
-.window-right {
-    top: 100px;
-    right: 80px;
-}
+        if (!selectedRoom) {
+            alert('Будь ласка, спочатку виберіть кімнату, щоб додати пристрій.');
+            selectRoomMessage.style.display = 'block';
+            return;
+        }
 
-.camera-icon {
-    position: absolute;
-    top: 50px;
-    right: 50px;
-    width: 40px;
-    height: 40px;
-    background-color: #555;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    z-index: 3;
-}
+        const itemPlaceholder = selectedRoom.querySelector('.item-placeholder');
 
-.camera-icon::after {
-    content: '';
-    width: 15px;
-    height: 15px;
-    background-color: white;
-    border-radius: 50%;
-}
+        if (!itemPlaceholder) {
+            alert('Не знайдено місце для пристроїв у вибраній кімнаті.');
+            return;
+        }
 
-/* Анімація для зовнішнього вигляду */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+        const newItemDiv = document.createElement('div');
+        newItemDiv.classList.add('smart-item', itemType);
 
-.house-facade.current-floor {
-    animation: fadeIn 0.8s ease-out forwards;
-}
+        let itemDisplayName = '';
+        let itemContent = '';
 
-/* Поверхи */
-.floor-layout {
-    width: 100%;
-    height: 100%;
-    background-color: #e6e6e6; /* Фон поверху */
-    border-radius: 10px;
-    padding: 20px;
-    box-sizing: border-box;
-    display: none; /* Приховано за замовчуванням */
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: space-around;
-    align-content: flex-start;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
+        switch (itemType) {
+            case 'light':
+                itemDisplayName = 'Світло';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <button data-action="toggle">Увімкнути</button>`;
+                break;
+            case 'thermostat':
+                itemDisplayName = 'Термостат';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <span class="temperature">22°C</span>
+                               <button data-action="temp-up">+</button>
+                               <button data-action="temp-down">-</button>`;
+                break;
+            case 'speaker':
+                itemDisplayName = 'Колонка';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <button data-action="play">Відтворити</button>
+                               <button data-action="pause">Пауза</button>`;
+                break;
+            case 'tv':
+                itemDisplayName = 'Телевізор';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <button data-action="toggle">Увімкнути</button>`;
+                break;
+            case 'motion-sensor':
+                itemDisplayName = 'Датчик руху';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <span class="status">Неактивний</span>
+                               <button data-action="toggle-status">Перемкнути статус</button>`;
+                break;
+            case 'smart-lock':
+                itemDisplayName = 'Розумний замок';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <span class="status">Заблоковано</span>
+                               <button data-action="toggle-lock">Розблокувати</button>`;
+                break;
+            case 'blinds':
+                itemDisplayName = 'Розумні штори';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <div class="blinds-controls">
+                                   <button data-action="open">Відкрити</button>
+                                   <button data-action="close">Закрити</button>
+                                   <button data-action="partially">Привідкрити</button>
+                               </div>`;
+                break;
+            case 'air-purifier':
+                itemDisplayName = 'Очищувач повітря';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <span class="status">Вимкнений</span>
+                               <button data-action="toggle">Увімкнути</button>`;
+                break;
+            case 'smoke-detector':
+                itemDisplayName = 'Датчик диму';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <span class="status">Норма</span>
+                               <button data-action="simulate-alarm">Імітувати дим</button>
+                               <button data-action="reset-alarm" style="display: none;">Скинути</button>`;
+                break;
+            case 'smart-plug':
+                itemDisplayName = 'Розумна розетка';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <span class="status">Вимкнена</span>
+                               <button data-action="toggle">Увімкнути</button>`;
+                break;
+            case 'robot-vacuum':
+                itemDisplayName = 'Робот-пилосос';
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <span class="status">Припаркований</span>
+                               <button data-action="start-cleaning">Почати прибирання</button>
+                               <button data-action="dock">Припаркувати</button>`;
+                break;
+            default:
+                itemDisplayName = itemType;
+                itemContent = `<span>${itemName} (${itemDisplayName})</span>
+                               <button data-action="info">Інфо</button>`;
+                break;
+        }
 
-.floor-layout.current-floor {
-    display: flex;
-    animation: fadeIn 0.8s ease-out forwards;
-}
+        newItemDiv.innerHTML = itemContent;
 
-.floor-layout h2 {
-    width: 100%;
-    text-align: center;
-    color: #28a745;
-    margin-bottom: 30px;
-    font-size: 2em;
-}
+        newItemDiv.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.action;
+                const parentItem = button.closest('.smart-item');
 
-.room {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    min-width: 250px;
-    flex: 1;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
+                switch (itemType) {
+                    case 'light':
+                    case 'tv':
+                    case 'smart-plug':
+                        const toggleButton = button;
+                        const statusSpan = parentItem.querySelector('.status');
+                        if (toggleButton.textContent.includes('Увімкнути')) {
+                            toggleButton.textContent = 'Вимкнути';
+                            parentItem.classList.add('on');
+                            if (statusSpan) statusSpan.textContent = 'Увімкнена';
+                        } else {
+                            toggleButton.textContent = 'Увімкнути';
+                            parentItem.classList.remove('on');
+                            if (statusSpan) statusSpan.textContent = 'Вимкнена';
+                        }
+                        alert(`Керування ${itemName}: ${toggleButton.textContent}`);
+                        break;
+                    case 'thermostat':
+                        const tempSpan = parentItem.querySelector('.temperature');
+                        let currentTemp = parseInt(tempSpan.textContent);
+                        if (action === 'temp-up') {
+                            currentTemp++;
+                        } else if (action === 'temp-down') {
+                            currentTemp--;
+                        }
+                        tempSpan.textContent = `${currentTemp}°C`;
+                        alert(`Температура ${itemName}: ${currentTemp}°C`);
+                        break;
+                    case 'speaker':
+                        if (action === 'play') {
+                            alert(`Відтворюється на ${itemName}`);
+                        } else if (action === 'pause') {
+                            alert(`Пауза на ${itemName}`);
+                        }
+                        break;
+                    case 'motion-sensor':
+                        const sensorStatus = parentItem.querySelector('.status');
+                        if (sensorStatus.textContent === 'Неактивний') {
+                            sensorStatus.textContent = 'Активний';
+                            parentItem.classList.add('active');
+                            alert(`Датчик руху ${itemName}: Виявлено рух!`);
+                        } else {
+                            sensorStatus.textContent = 'Неактивний';
+                            parentItem.classList.remove('active');
+                            alert(`Датчик руху ${itemName}: Активний статус скинуто.`);
+                        }
+                        break;
+                    case 'smart-lock':
+                        const lockStatus = parentItem.querySelector('.status');
+                        const lockButton = button;
+                        if (lockStatus.textContent === 'Заблоковано') {
+                            lockStatus.textContent = 'Розблоковано';
+                            parentItem.classList.remove('locked');
+                            parentItem.classList.add('unlocked');
+                            lockButton.textContent = 'Заблокувати';
+                            alert(`Замок ${itemName}: Розблоковано.`);
+                        } else {
+                            lockStatus.textContent = 'Заблоковано';
+                            parentItem.classList.remove('unlocked');
+                            parentItem.classList.add('locked');
+                            lockButton.textContent = 'Розблокувати';
+                            alert(`Замок ${itemName}: Заблоковано.`);
+                        }
+                        break;
+                    case 'blinds':
+                        if (action === 'open') {
+                            alert(`Штори ${itemName}: Повністю відкрито.`);
+                        } else if (action === 'close') {
+                            alert(`Штори ${itemName}: Повністю закрито.`);
+                        } else if (action === 'partially') {
+                            alert(`Штори ${itemName}: Привідкрито.`);
+                        }
+                        break;
+                    case 'air-purifier':
+                        const purifierStatus = parentItem.querySelector('.status');
+                        const purifierButton = button;
+                        if (purifierButton.textContent.includes('Увімкнути')) {
+                            purifierButton.textContent = 'Вимкнути';
+                            purifierStatus.textContent = 'Увімкнений';
+                            parentItem.classList.add('on');
+                        } else {
+                            purifierButton.textContent = 'Увімкнути';
+                            purifierStatus.textContent = 'Вимкнений';
+                            parentItem.classList.remove('on');
+                        }
+                        alert(`Очищувач повітря ${itemName}: ${purifierStatus.textContent}`);
+                        break;
+                    case 'smoke-detector':
+                        const smokeStatus = parentItem.querySelector('.status');
+                        const simulateButton = parentItem.querySelector('button[data-action="simulate-alarm"]');
+                        const resetButton = parentItem.querySelector('button[data-action="reset-alarm"]');
+                        if (action === 'simulate-alarm') {
+                            smokeStatus.textContent = 'ТРИВОГА!';
+                            parentItem.classList.add('alarm');
+                            simulateButton.style.display = 'none';
+                            resetButton.style.display = 'inline-block';
+                            alert(`Датчик диму ${itemName}: Виявлено дим!`);
+                        } else if (action === 'reset-alarm') {
+                            smokeStatus.textContent = 'Норма';
+                            parentItem.classList.remove('alarm');
+                            simulateButton.style.display = 'inline-block';
+                            resetButton.style.display = 'none';
+                            alert(`Датчик диму ${itemName}: Скинуто тривогу.`);
+                        }
+                        break;
+                    case 'robot-vacuum':
+                        const vacuumStatus = parentItem.querySelector('.status');
+                        const startButton = parentItem.querySelector('button[data-action="start-cleaning"]');
+                        const dockButton = parentItem.querySelector('button[data-action="dock"]');
 
-.room h3 {
-    color: #555;
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.5em;
-}
+                        if (action === 'start-cleaning') {
+                            vacuumStatus.textContent = 'Прибирання...';
+                            parentItem.classList.remove('docked');
+                            parentItem.classList.add('cleaning');
+                            startButton.style.display = 'none';
+                            dockButton.style.display = 'inline-block';
+                            alert(`Робот-пилосос ${itemName}: Почав прибирання.`);
+                        } else if (action === 'dock') {
+                            vacuumStatus.textContent = 'Припаркований';
+                            parentItem.classList.remove('cleaning');
+                            parentItem.classList.add('docked');
+                            startButton.style.display = 'inline-block';
+                            dockButton.style.display = 'none';
+                            alert(`Робот-пилосос ${itemName}: Припарковано.`);
+                        }
+                        break;
+                    default:
+                        alert(`Керування пристроєм: ${itemName} (${itemDisplayName}) - Дія: ${action}`);
+                        break;
+                }
+            });
+        });
 
-.item-placeholder {
-    width: 100%;
-    min-height: 100px;
-    border: 2px dashed #ccc;
-    border-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #888;
-    font-style: italic;
-    flex-direction: column;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-.smart-item {
-    background-color: #c9e6c9; /* Світло-зелений для смарт-речей */
-    border: 1px solid #a7d9a7;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    width: calc(100% - 20px);
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.9em;
-    flex-wrap: wrap; /* Додано для контролів штор */
-}
-
-.smart-item button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    background-color: #28a745;
-    color: white;
-}
-
-.smart-item button:hover {
-    background-color: #218838;
-}
-
-/* Стилі для різних типів пристроїв */
-.smart-item.light button { background-color: #ffc107; color: #333; }
-.smart-item.light button:hover { background-color: #e0a800; }
-
-.smart-item.thermostat button { background-color: #17a2b8; }
-.smart-item.thermostat button:hover { background-color: #138496; }
-.smart-item.thermostat .temperature { font-weight: bold; margin-left: 5px; }
-
-.smart-item.speaker button { background-color: #6f42c1; }
-.smart-item.speaker button:hover { background-color: #5a32a0; }
-
-.smart-item.tv button { background-color: #dc3545; }
-.smart-item.tv button:hover { background-color: #c82333; }
-
-.smart-item.motion-sensor { background-color: #f7e6c9; }
-.smart-item.motion-sensor .status { font-weight: bold; margin-left: 5px; color: #555; }
-.smart-item.motion-sensor.active .status { color: #28a745; }
-
-.smart-item.smart-lock { background-color: #d1c9e6; }
-.smart-item.smart-lock .status { font-weight: bold; margin-left: 5px; color: #555; }
-.smart-item.smart-lock.locked .status { color: #dc3545; }
-.smart-item.smart-lock.unlocked .status { color: #28a745; }
-
-.smart-item.blinds { background-color: #c9e6d8; }
-.smart-item.blinds .blinds-controls button {
-    margin-left: 5px; /* Зменшити відступ між кнопками */
-    margin-top: 5px; /* Для розташування на новому рядку, якщо місця мало */
-    background-color: #6c757d;
-}
-.smart-item.blinds .blinds-controls button:hover { background-color: #5a6268; }
-
-.smart-item.air-purifier { background-color: #e0f2f7; }
-.smart-item.air-purifier .status { font-weight: bold; margin-left: 5px; color: #555; }
-.smart-item.air-purifier.on .status { color: #28a745; }
-
-.smart-item.smoke-detector { background-color: #ffe0b2; } /* Помаранчевий */
-.smart-item.smoke-detector .status { font-weight: bold; margin-left: 5px; color: #555; }
-.smart-item.smoke-detector.alarm .status { color: #dc3545; } /* Червоний для тривоги */
-
-.smart-item.smart-plug { background-color: #d1c8e6; } /* Фіолетовий */
-.smart-item.smart-plug .status { font-weight: bold; margin-left: 5px; color: #555; }
-.smart-item.smart-plug.on .status { color: #28a745; }
-
-.smart-item.robot-vacuum { background-color: #c8e6c9; } /* Сірий */
-.smart-item.robot-vacuum .status { font-weight: bold; margin-left: 5px; color: #555; }
-.smart-item.robot-vacuum.cleaning .status { color: #28a745; }
-.smart-item.robot-vacuum.docked .status { color: #17a2b8; }
-
-
-/* Контроли додавання пристроїв */
-.add-item-controls {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
-}
-
-.add-item-controls select,
-.add-item-controls input[type="text"] {
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-.add-item-controls button {
-    width: 100%;
-    padding: 12px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
-
-.add-item-controls button:hover {
-    background-color: #0056b3;
-}
+        itemPlaceholder.appendChild(newItemDiv);
+        itemNameInput.value = '';
+    });
+});
