@@ -3,145 +3,390 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мій Розумний Будинок</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        #house-container {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .room {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #e9e9e9;
+        }
+        .smart-device {
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px dashed #999;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        #boom-button {
+            background-color: #dc3545;
+        }
+        #boom-controls button {
+            background-color: #28a745;
+        }
+        .exploded #house-container {
+            display: none;
+        }
+        .exploded #boom-controls {
+            display: block;
+        }
+        #boom-controls {
+            display: none; /* Приховано за замовчуванням */
+            text-align: center;
+        }
+        #camera-feed {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            background-color: #000;
+            color: #0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Мій Розумний Будинок</h1>
-        <p>Керуй своїм простором з легкістю</p>
-    </header>
 
-    <main class="house-container">
-        <div class="sidebar">
-            <h2>Навігація</h2>
-            <button class="nav-button" data-floor="outside">Зовнішній вигляд</button>
-            <button class="nav-button" data-floor="floor1">1 Поверх</button>
-            <button class="nav-button" data-floor="floor2">2 Поверх</button>
-            <button class="nav-button" data-floor="floor3">3 Поверх</button>
-            <button class="nav-button" data-floor="floor4">4 Поверх</button>
-            <button class="nav-button" data-floor="floor5">5 Поверх</button>
+    <h1>Мій Розумний Будинок</h1>
 
-            <h2>Керування</h2>
-            <div class="door-controls">
-                <p>Керування дверима:</p>
-                <button id="openDoorButton">Відкрити</button>
-                <button id="closeDoorButton">Закрити</button>
-                <button id="repairDoorButton">Відремонтувати</button>
-            </div>
-            <button id="toggleCamera">Увімкнути/Вимкнути Камеру</button>
-            <div class="camera-feed" id="cameraFeed">
-                <h3>Вигляд з Камери</h3>
-                <video autoplay muted loop id="cameraVideo">
-                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-                    Ваш браузер не підтримує відео.
-                </video>
-            </div>
+    <div id="controls">
+        <button id="open-door-btn">Відчинити Вхідні Двері</button>
+        <button id="close-door-btn">Зачинити Вхідні Двері</button>
+        <button id="toggle-camera-main">Увімкнути/Вимкнути Камеру (Головна)</button>
+        <button id="add-room-btn">Додати Кімнату</button>
+        <button id="boom-button">BOOM</button>
+    </div>
 
-            <h2>Додати речі</h2>
-            <div class="add-item-controls">
-                <select id="itemType">
-                    <option value="light">Світло</option>
-                    <option value="thermostat">Термостат</option>
-                    <option value="speaker">Колонка</option>
-                    <option value="tv">Телевізор</option>
-                    <option value="motion-sensor">Датчик руху</option>
-                    <option value="smart-lock">Розумний замок</option>
-                    <option value="blinds">Розумні штори</option>
-                    <option value="air-purifier">Очищувач повітря</option>
-                    <option value="smoke-detector">Датчик диму</option>
-                    <option value="smart-plug">Розумна розетка</option>
-                    <option value="robot-vacuum">Робот-пилосос</option>
-                </select>
-                <input type="text" id="itemName" placeholder="Назва пристрою">
-                <button id="addItem">Додати пристрій</button>
-                <p class="select-room-message">Будь ласка, виберіть кімнату на поверсі.</p>
-            </div>
-        </div>
+    <div id="house-container">
+        <h2>Будинок</h2>
+        <p id="main-door-status">Вхідні двері: Зачинені</p>
 
-        <div class="house-view">
-            <div class="house-facade current-floor" id="outside">
-                <div class="door-wrapper">
-                    <div class="door" id="mainDoor"></div>
-                    <div class="door-status" id="doorStatus">Двері зачинені</div>
-                </div>
-                <div class="window window-left"></div>
-                <div class="window window-right"></div>
-                <div class="camera-icon" id="cameraIcon"></div>
-                <div class="house-name">Мій Дім</div>
-            </div>
-
-            <div class="floor-layout" id="floor1">
-                <h2>1 Поверх - Вітальня та Кухня</h2>
-                <div class="floor-rooms-container">
-                    <div class="room" data-room-id="floor1-living-room">
-                        <h3>Вітальня</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
-                    <div class="room" data-room-id="floor1-kitchen">
-                        <h3>Кухня</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
+        <div id="rooms-container">
+            <h3>Кімнати:</h3>
+            <div class="room" id="room1">
+                <h4>Вітальня</h4>
+                <p>
+                    <button onclick="toggleLight('room1')">Світло (Вітальня)</button>
+                    <span id="light-room1-status">Вимкнено</span>
+                </p>
+                <p>
+                    <button onclick="toggleWindow('room1')">Вікно (Вітальня)</button>
+                    <span id="window-room1-status">Зачинено</span>
+                </p>
+                <div class="smart-device">
+                    <h5>Камера Вітальня</h5>
+                    <p id="camera-room1-status">Статус: Вимкнено</p>
+                    <button onclick="toggleCamera('room1')">Увімкнути/Вимкнути</button>
                 </div>
             </div>
-
-            <div class="floor-layout" id="floor2">
-                <h2>2 Поверх - Спальня та Ванна</h2>
-                <div class="floor-rooms-container">
-                    <div class="room" data-room-id="floor2-bedroom">
-                        <h3>Спальня</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
-                    <div class="room" data-room-id="floor2-bathroom">
-                        <h3>Ванна</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="floor-layout" id="floor3">
-                <h2>3 Поверх - Офіс та Балкон</h2>
-                <div class="floor-rooms-container">
-                    <div class="room" data-room-id="floor3-office">
-                        <h3>Офіс</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
-                    <div class="room" data-room-id="floor3-balcony">
-                        <h3>Балкон</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="floor-layout" id="floor4">
-                <h2>4 Поверх - Дитяча та Пральня</h2>
-                <div class="floor-rooms-container">
-                    <div class="room" data-room-id="floor4-kids-room">
-                        <h3>Дитяча кімната</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
-                    <div class="room" data-room-id="floor4-laundry-room">
-                        <h3>Пральня</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="floor-layout" id="floor5">
-                <h2>5 Поверх - Тераса та Комора</h2>
-                <div class="floor-rooms-container">
-                    <div class="room" data-room-id="floor5-terrace">
-                        <h3>Тераса</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
-                    <div class="room" data-room-id="floor5-storage">
-                        <h3>Комора</h3>
-                        <div class="item-placeholder"></div>
-                    </div>
+            <div class="room" id="room2">
+                <h4>Кухня</h4>
+                <p>
+                    <button onclick="toggleLight('room2')">Світло (Кухня)</button>
+                    <span id="light-room2-status">Вимкнено</span>
+                </p>
+                <p>
+                    <button onclick="toggleWindow('room2')">Вікно (Кухня)</button>
+                    <span id="window-room2-status">Зачинено</span>
+                </p>
+                <div class="smart-device">
+                    <h5>Камера Кухня</h5>
+                    <p id="camera-room2-status">Статус: Вимкнено</p>
+                    <button onclick="toggleCamera('room2')">Увімкнути/Вимкнути</button>
                 </div>
             </div>
         </div>
-    </main>
 
-    <script src="script.js"></script>
+        <h3>Під'їзд та Поверхи</h3>
+        <p>
+            <button onclick="alert('Ви увійшли до під\'їзду.')">Увійти до під'їзду</button>
+            <button onclick="alert('Піднятися на 1-й поверх.')">Піднятися на 1-й поверх</button>
+            <button onclick="alert('Піднятися на 2-й поверх.')">Піднятися на 2-й поверх</button>
+        </p>
+
+        <h3>Відеоспостереження</h3>
+        <div id="camera-feed">
+            Оберіть камеру для перегляду...
+        </div>
+        <p>
+            <button onclick="selectCamera('street')">Камера: Вулиця</button>
+            <button onclick="selectCamera('main-door')">Камера: Вхідні Двері</button>
+            <button onclick="selectCamera('room1')">Камера: Вітальня</button>
+            <button onclick="selectCamera('room2')">Камера: Кухня</button>
+            <button onclick="selectCamera('entrance')">Камера: Під'їзд</button>
+            <button onclick="selectCamera('inside-house')">Камера: Всередині будинку</button>
+        </p>
+
+    </div>
+
+    <div id="boom-controls">
+        <h2>Будинок зруйновано!</h2>
+        <button id="restore-house-btn">Відновити Будинок</button>
+        <button id="build-new-house-btn">Побудувати Новий Будинок</button>
+        <button id="build-new-room-btn">Побудувати Нову Кімнату</button>
+        <button id="remove-room-btn">Видалити Кімнату</button>
+    </div>
+
+    <script>
+        let houseExists = true;
+        let roomCounter = 2; // Починаємо з 2, бо вже є 2 кімнати
+
+        // Функції для розумних речей
+        function toggleDoor(action) {
+            const doorStatus = document.getElementById('main-door-status');
+            if (action === 'open') {
+                doorStatus.textContent = 'Вхідні двері: Відчинені';
+                alert('Двері відчинено!');
+            } else {
+                doorStatus.textContent = 'Вхідні двері: Зачинені';
+                alert('Двері зачинено!');
+            }
+        }
+
+        function toggleLight(roomId) {
+            const lightStatus = document.getElementById(`light-${roomId}-status`);
+            if (lightStatus.textContent === 'Вимкнено') {
+                lightStatus.textContent = 'Увімкнено';
+                alert(`Світло у ${roomId} увімкнено.`);
+            } else {
+                lightStatus.textContent = 'Вимкнено';
+                alert(`Світло у ${roomId} вимкнено.`);
+            }
+        }
+
+        function toggleWindow(roomId) {
+            const windowStatus = document.getElementById(`window-${roomId}-status`);
+            if (windowStatus.textContent === 'Зачинено') {
+                windowStatus.textContent = 'Відчинено';
+                alert(`Вікно у ${roomId} відчинено.`);
+            } else {
+                windowStatus.textContent = 'Зачинено';
+                alert(`Вікно у ${roomId} зачинено.`);
+            }
+        }
+
+        function toggleCamera(cameraId) {
+            const cameraStatus = document.getElementById(`camera-${cameraId}-status`);
+            if (cameraStatus.textContent === 'Статус: Вимкнено') {
+                cameraStatus.textContent = 'Статус: Увімкнено';
+                alert(`Камера ${cameraId} увімкнено.`);
+            } else {
+                cameraStatus.textContent = 'Статус: Вимкнено';
+                alert(`Камера ${cameraId} вимкнено.`);
+            }
+        }
+
+        function selectCamera(cameraName) {
+            const cameraFeed = document.getElementById('camera-feed');
+            let feedText = '';
+            switch (cameraName) {
+                case 'street':
+                    feedText = 'Перегляд: Вулиця (трансляція симульована)';
+                    break;
+                case 'main-door':
+                    feedText = 'Перегляд: Вхідні Двері (трансляція симульована)';
+                    break;
+                case 'room1':
+                    feedText = 'Перегляд: Вітальня (трансляція симульована)';
+                    break;
+                case 'room2':
+                    feedText = 'Перегляд: Кухня (трансляція симульована)';
+                    break;
+                case 'entrance':
+                    feedText = 'Перегляд: Під\'їзд (трансляція симульована)';
+                    break;
+                case 'inside-house':
+                    feedText = 'Перегляд: Всередині будинку (трансляція симульована)';
+                    break;
+                default:
+                    feedText = 'Оберіть камеру для перегляду...';
+            }
+            cameraFeed.textContent = feedText;
+        }
+
+
+        // Функції для побудови та руйнування будинку
+        function buildHouse() {
+            document.body.classList.remove('exploded');
+            document.getElementById('house-container').innerHTML = `
+                <h2>Будинок</h2>
+                <p id="main-door-status">Вхідні двері: Зачинені</p>
+
+                <div id="rooms-container">
+                    <h3>Кімнати:</h3>
+                    <div class="room" id="room1">
+                        <h4>Вітальня</h4>
+                        <p>
+                            <button onclick="toggleLight('room1')">Світло (Вітальня)</button>
+                            <span id="light-room1-status">Вимкнено</span>
+                        </p>
+                        <p>
+                            <button onclick="toggleWindow('room1')">Вікно (Вітальня)</button>
+                            <span id="window-room1-status">Зачинено</span>
+                        </p>
+                        <div class="smart-device">
+                            <h5>Камера Вітальня</h5>
+                            <p id="camera-room1-status">Статус: Вимкнено</p>
+                            <button onclick="toggleCamera('room1')">Увімкнути/Вимкнути</button>
+                        </div>
+                    </div>
+                    <div class="room" id="room2">
+                        <h4>Кухня</h4>
+                        <p>
+                            <button onclick="toggleLight('room2')">Світло (Кухня)</button>
+                            <span id="light-room2-status">Вимкнено</span>
+                        </p>
+                        <p>
+                            <button onclick="toggleWindow('room2')">Вікно (Кухня)</button>
+                            <span id="window-room2-status">Зачинено</span>
+                        </p>
+                        <div class="smart-device">
+                            <h5>Камера Кухня</h5>
+                            <p id="camera-room2-status">Статус: Вимкнено</p>
+                            <button onclick="toggleCamera('room2')">Увімкнути/Вимкнути</button>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Під'їзд та Поверхи</h3>
+                <p>
+                    <button onclick="alert('Ви увійшли до під\'їзду.')">Увійти до під'їзду</button>
+                    <button onclick="alert('Піднятися на 1-й поверх.')">Піднятися на 1-й поверх</button>
+                    <button onclick="alert('Піднятися на 2-й поверх.')">Піднятися на 2-й поверх</button>
+                </p>
+
+                <h3>Відеоспостереження</h3>
+                <div id="camera-feed">
+                    Оберіть камеру для перегляду...
+                </div>
+                <p>
+                    <button onclick="selectCamera('street')">Камера: Вулиця</button>
+                    <button onclick="selectCamera('main-door')">Камера: Вхідні Двері</button>
+                    <button onclick="selectCamera('room1')">Камера: Вітальня</button>
+                    <button onclick="selectCamera('room2')">Камера: Кухня</button>
+                    <button onclick="selectCamera('entrance')">Камера: Під'їзд</button>
+                    <button onclick="selectCamera('inside-house')">Камера: Всередині будинку</button>
+                </p>
+            `;
+            houseExists = true;
+            roomCounter = 2; // Скидаємо лічильник кімнат
+        }
+
+        function destroyHouse() {
+            document.body.classList.add('exploded');
+            houseExists = false;
+        }
+
+        function addRoom() {
+            if (!houseExists) {
+                alert('Будинок зруйновано! Спочатку відновіть або побудуйте новий будинок.');
+                return;
+            }
+            roomCounter++;
+            const roomsContainer = document.getElementById('rooms-container');
+            const newRoomId = `room${roomCounter}`;
+            const roomName = prompt('Введіть назву нової кімнати:', `Кімната ${roomCounter}`);
+            if (!roomName) return; // Якщо користувач скасував
+
+            const newRoomHTML = `
+                <div class="room" id="${newRoomId}">
+                    <h4>${roomName}</h4>
+                    <p>
+                        <button onclick="toggleLight('${newRoomId}')">Світло (${roomName})</button>
+                        <span id="light-${newRoomId}-status">Вимкнено</span>
+                    </p>
+                    <p>
+                        <button onclick="toggleWindow('${newRoomId}')">Вікно (${roomName})</button>
+                        <span id="window-${newRoomId}-status">Зачинено</span>
+                    </p>
+                    <div class="smart-device">
+                        <h5>Камера ${roomName}</h5>
+                        <p id="camera-${newRoomId}-status">Статус: Вимкнено</p>
+                        <button onclick="toggleCamera('${newRoomId}')">Увімкнути/Вимкнути</button>
+                    </div>
+                </div>
+            `;
+            roomsContainer.insertAdjacentHTML('beforeend', newRoomHTML);
+            alert(`Кімната "${roomName}" додана.`);
+        }
+
+        function removeRoom() {
+            if (!houseExists) {
+                alert('Будинок зруйновано! Спочатку відновіть або побудуйте новий будинок.');
+                return;
+            }
+            const roomsContainer = document.getElementById('rooms-container');
+            const rooms = roomsContainer.querySelectorAll('.room');
+            if (rooms.length === 0) {
+                alert('Немає кімнат для видалення.');
+                return;
+            }
+
+            let roomIds = Array.from(rooms).map(room => room.id);
+            let roomIdToRemove = prompt('Введіть ID кімнати, яку хочете видалити (наприклад, room1, room2): \n' + roomIds.join(', '));
+
+            if (roomIdToRemove) {
+                const roomToRemove = document.getElementById(roomIdToRemove);
+                if (roomToRemove && roomToRemove.classList.contains('room')) {
+                    const confirmRemove = confirm(`Ви впевнені, що хочете видалити кімнату "${roomToRemove.querySelector('h4').textContent}"?`);
+                    if (confirmRemove) {
+                        roomToRemove.remove();
+                        alert(`Кімната "${roomIdToRemove}" видалена.`);
+                    }
+                } else {
+                    alert('Кімнату з таким ID не знайдено, або це не кімната.');
+                }
+            }
+        }
+
+
+        // Обробники подій
+        document.getElementById('open-door-btn').addEventListener('click', () => toggleDoor('open'));
+        document.getElementById('close-door-btn').addEventListener('click', () => toggleDoor('close'));
+        document.getElementById('add-room-btn').addEventListener('click', addRoom);
+        document.getElementById('boom-button').addEventListener('click', destroyHouse);
+
+        // Кнопки після BOOM
+        document.getElementById('restore-house-btn').addEventListener('click', buildHouse);
+        document.getElementById('build-new-house-btn').addEventListener('click', () => {
+            if (confirm('Ви впевнені, що хочете побудувати абсолютно новий будинок? Поточний стан буде втрачено.')) {
+                buildHouse(); // Побудувати новий, по суті, скинути
+                alert('Побудовано новий будинок!');
+            }
+        });
+        document.getElementById('build-new-room-btn').addEventListener('click', addRoom);
+        document.getElementById('remove-room-btn').addEventListener('click', removeRoom);
+    </script>
+
 </body>
 </html>
