@@ -60,17 +60,40 @@ header {
     transform: translateY(-2px);
 }
 
-.sidebar button#toggleDoor,
+/* Стилі для кнопок керування */
 .sidebar button#toggleCamera,
 .sidebar button#addItem {
     background-color: #28a745;
     color: white;
 }
 
-.sidebar button#toggleDoor:hover,
 .sidebar button#toggleCamera:hover,
 .sidebar button#addItem:hover {
     background-color: #218838;
+}
+
+/* Контроли дверей */
+.door-controls {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.door-controls p {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+.door-controls button {
+    background-color: #007bff; /* Колір кнопок дверей */
+    color: white;
+    margin-bottom: 5px; /* Зменшуємо відступ між кнопками дверей */
+}
+
+.door-controls button:hover {
+    background-color: #0056b3;
 }
 
 .camera-feed {
@@ -113,13 +136,12 @@ header {
     border-radius: 10px;
     position: relative;
     overflow: hidden;
-    display: flex; /* Змінено на flex для центрування */
+    display: flex;
     justify-content: center;
     align-items: flex-end;
     flex-direction: column;
     padding-bottom: 50px; /* Місце для трави */
     box-sizing: border-box;
-    /* display: block; */ /* Повернено до block, якщо flex викликає проблеми */
 }
 
 .house-facade::before {
@@ -172,6 +194,35 @@ header {
 .door.open {
     transform: perspective(1000px) rotateY(-90deg);
 }
+
+/* Стилі для стану дверей */
+.door-status {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    z-index: 3;
+    white-space: nowrap;
+}
+
+.door.broken {
+    background-color: #dc3545; /* Червоний колір для зламаних дверей */
+    animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
 
 .window {
     position: absolute;
@@ -236,10 +287,8 @@ header {
     padding: 20px;
     box-sizing: border-box;
     display: none; /* Приховано за замовчуванням */
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: space-around;
-    align-content: flex-start;
+    flex-direction: column; /* Поверхи будуть стовпчиком, а кімнати в рядок */
+    align-items: center;
     position: absolute;
     top: 0;
     left: 0;
@@ -258,18 +307,38 @@ header {
     font-size: 2em;
 }
 
+.floor-rooms-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-around;
+    width: 100%;
+}
+
 .room {
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 20px;
-    min-width: 250px;
-    flex: 1;
+    min-width: 280px; /* Збільшена мінімальна ширина для кімнат */
+    flex: 1; /* Дозволяє кімнатам займати доступний простір */
+    max-width: 48%; /* Щоб дві кімнати були в рядок */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    cursor: pointer; /* Вказує, що кімната клікабельна */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.room:hover {
+    border-color: #a0a0a0;
+}
+
+.room.selected-room {
+    border: 3px solid #007bff; /* Колір виділення обраної кімнати */
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }
 
 .room h3 {
@@ -292,6 +361,8 @@ header {
     flex-direction: column;
     padding: 10px;
     box-sizing: border-box;
+    overflow-y: auto; /* Дозволяє прокрутку, якщо багато об'єктів */
+    max-height: 250px; /* Обмеження висоти, щоб не розтягувало кімнату */
 }
 
 .smart-item {
@@ -306,7 +377,11 @@ header {
     justify-content: space-between;
     align-items: center;
     font-size: 0.9em;
-    flex-wrap: wrap; /* Додано для контролів штор */
+    flex-wrap: wrap; /* Дозволяє елементам переноситися на новий рядок */
+}
+
+.smart-item:last-child {
+    margin-bottom: 0; /* Видалити нижній відступ для останнього елемента */
 }
 
 .smart-item button {
@@ -347,9 +422,14 @@ header {
 .smart-item.smart-lock.unlocked .status { color: #28a745; }
 
 .smart-item.blinds { background-color: #c9e6d8; }
+.smart-item.blinds .blinds-controls {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+}
 .smart-item.blinds .blinds-controls button {
-    margin-left: 5px; /* Зменшити відступ між кнопками */
-    margin-top: 5px; /* Для розташування на новому рядку, якщо місця мало */
+    margin-left: 0; /* Видалити лівий відступ для кнопок всередині controls */
     background-color: #6c757d;
 }
 .smart-item.blinds .blinds-controls button:hover { background-color: #5a6268; }
@@ -366,7 +446,7 @@ header {
 .smart-item.smart-plug .status { font-weight: bold; margin-left: 5px; color: #555; }
 .smart-item.smart-plug.on .status { color: #28a745; }
 
-.smart-item.robot-vacuum { background-color: #c8e6c9; } /* Сірий */
+.smart-item.robot-vacuum { background-color: #e0ffe0; } /* Світло-сірий */
 .smart-item.robot-vacuum .status { font-weight: bold; margin-left: 5px; color: #555; }
 .smart-item.robot-vacuum.cleaning .status { color: #28a745; }
 .smart-item.robot-vacuum.docked .status { color: #17a2b8; }
@@ -403,4 +483,11 @@ header {
 
 .add-item-controls button:hover {
     background-color: #0056b3;
+}
+
+.select-room-message {
+    color: #dc3545;
+    font-size: 0.9em;
+    margin-top: 10px;
+    display: none; /* Приховано за замовчуванням */
 }
