@@ -1,146 +1,406 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const mainDoor = document.getElementById('mainDoor');
-    const toggleDoorButton = document.getElementById('toggleDoor');
-    const cameraIcon = document.getElementById('cameraIcon');
-    const cameraFeed = document.getElementById('cameraFeed');
-    const cameraVideo = document.getElementById('cameraVideo');
-    const toggleCameraButton = document.getElementById('toggleCamera');
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7f6;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
 
-    const navButtons = document.querySelectorAll('.nav-button');
-    const houseView = document.querySelector('.house-view'); // Батьківський контейнер для всіх поверхів/фасаду
-    const allViews = document.querySelectorAll('.house-facade, .floor-layout'); // Всі можливі види (фасад + поверхи)
+header {
+    background-color: #28a745;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-    const addItemButton = document.getElementById('addItem');
-    const itemTypeSelect = document.getElementById('itemType');
-    const itemNameInput = document.getElementById('itemName');
+.house-container {
+    display: flex;
+    flex-grow: 1;
+    padding: 20px;
+    gap: 20px;
+}
 
-    let currentFloorId = 'outside'; // Початковий поверх - зовнішній вигляд
+.sidebar {
+    width: 250px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
 
-    // Функція для перемикання поверхів
-    function switchFloor(targetFloorId) {
-        // Приховуємо всі поверхи та фасад
-        allViews.forEach(view => {
-            view.classList.remove('current-floor');
-            view.style.display = 'none'; // Додаємо display: none для повного приховування
-        });
+.sidebar h2 {
+    color: #28a745;
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
 
-        // Показуємо потрібний поверх або фасад
-        const targetElement = document.getElementById(targetFloorId);
-        if (targetElement) {
-            targetElement.style.display = 'flex'; // Використовуємо flex, оскільки floor-layout flex
-            targetElement.classList.add('current-floor');
-            currentFloorId = targetFloorId;
-        }
-    }
+.sidebar button {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border: none;
+    background-color: #e0e0e0;
+    color: #333;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
 
-    // Ініціалізація: показати зовнішній вигляд при завантаженні сторінки
-    switchFloor('outside');
+.sidebar button:hover {
+    background-color: #d0d0d0;
+    transform: translateY(-2px);
+}
 
-    // Перемикання дверей
-    toggleDoorButton.addEventListener('click', () => {
-        mainDoor.classList.toggle('open');
-        if (mainDoor.classList.contains('open')) {
-            toggleDoorButton.textContent = 'Закрити Двері';
-        } else {
-            toggleDoorButton.textContent = 'Відкрити Двері';
-        }
-    });
+.sidebar button#toggleDoor,
+.sidebar button#toggleCamera,
+.sidebar button#addItem {
+    background-color: #28a745;
+    color: white;
+}
 
-    // Перемикання камери
-    toggleCameraButton.addEventListener('click', () => {
-        if (cameraFeed.style.display === 'block') {
-            cameraFeed.style.display = 'none';
-            cameraVideo.pause();
-            toggleCameraButton.textContent = 'Увімкнути Камеру';
-        } else {
-            cameraFeed.style.display = 'block';
-            cameraVideo.play();
-            toggleCameraButton.textContent = 'Вимкнути Камеру';
-        }
-    });
+.sidebar button#toggleDoor:hover,
+.sidebar button#toggleCamera:hover,
+.sidebar button#addItem:hover {
+    background-color: #218838;
+}
 
-    cameraIcon.addEventListener('click', () => {
-        // Та ж функціональність, що й у кнопки
-        toggleCameraButton.click();
-    });
+.camera-feed {
+    margin-top: 20px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    display: none; /* Приховано за замовчуванням */
+    text-align: center;
+}
 
-    // Навігація по поверхах
-    navButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const floorId = button.dataset.floor;
-            switchFloor(floorId);
-        });
-    });
+.camera-feed h3 {
+    margin-top: 0;
+    color: #555;
+    font-size: 1em;
+}
 
-    // Додавання "розумних" речей
-    addItemButton.addEventListener('click', () => {
-        const itemType = itemTypeSelect.value;
-        const itemName = itemNameInput.value.trim();
+.camera-feed video {
+    width: 100%;
+    max-width: 200px;
+    border-radius: 5px;
+    background-color: black;
+}
 
-        if (!itemName) {
-            alert('Будь ласка, введіть назву для пристрою.');
-            return;
-        }
+.house-view {
+    flex-grow: 1;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    overflow: hidden; /* Для приховування неактивних поверхів */
+    position: relative;
+}
 
-        // Пошук поточного активного поверху
-        // Використовуємо currentFloorId для визначення поточного відображуваного поверху
-        const currentActiveFloorElement = document.getElementById(currentFloorId);
+/* Зовнішній вигляд будинку */
+.house-facade {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #a2d9ff, #7ad2ff); /* Небо */
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    display: flex; /* Змінено на flex для центрування */
+    justify-content: center;
+    align-items: flex-end;
+    flex-direction: column;
+    padding-bottom: 50px; /* Місце для трави */
+    box-sizing: border-box;
+    /* display: block; */ /* Повернено до block, якщо flex викликає проблеми */
+}
 
-        if (!currentActiveFloorElement || currentFloorId === 'outside') {
-            alert('Будь ласка, оберіть внутрішній поверх (1-5) для додавання пристрою.');
-            return;
-        }
+.house-facade::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #8bc34a; /* Трава */
+    z-index: 1;
+}
 
-        // Знаходимо всі місця для пристроїв на поточному поверсі
-        const itemPlaceholders = currentActiveFloorElement.querySelectorAll('.item-placeholder');
+.house-facade .house-name {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #4CAF50;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
 
-        if (itemPlaceholders.length === 0) {
-            alert('На цьому поверсі немає місць для додавання пристроїв.');
-            return;
-        }
+.door-wrapper {
+    position: relative;
+    width: 120px;
+    height: 180px;
+    background-color: #8b4513; /* Колір дверного отвору */
+    border-radius: 5px;
+    margin-bottom: 20px;
+    z-index: 2;
+    overflow: hidden;
+    border: 5px solid #6a340b;
+}
 
-        // Створення нового елемента
-        const newItemDiv = document.createElement('div');
-        newItemDiv.classList.add('smart-item', itemType);
+.door {
+    width: 100%;
+    height: 100%;
+    background-color: #a0522d; /* Колір дверей */
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: left;
+    transition: transform 0.5s ease-out;
+    border-left: 5px solid #8b4513;
+}
 
-        let itemDisplayName = '';
-        switch (itemType) {
-            case 'light': itemDisplayName = 'Світло'; break;
-            case 'thermostat': itemDisplayName = 'Термостат'; break;
-            case 'speaker': itemDisplayName = 'Колонка'; break;
-            case 'tv': itemDisplayName = 'Телевізор'; break;
-            default: itemDisplayName = itemType;
-        }
+.door.open {
+    transform: perspective(1000px) rotateY(-90deg);
+}
 
-        newItemDiv.innerHTML = `
-            <span>${itemName} (${itemDisplayName})</span>
-            <button data-action="toggle">Увімкнути/Вимкнути</button>
-        `;
+.window {
+    position: absolute;
+    width: 80px;
+    height: 100px;
+    background-color: #add8e6; /* Світло-блакитний для вікна */
+    border: 3px solid #6a340b;
+    border-radius: 5px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
 
-        // Додаємо обробник подій для кнопки
-        const toggleButton = newItemDiv.querySelector('button');
-        toggleButton.addEventListener('click', () => {
-            alert(`Керування пристроєм: ${itemName} (${itemDisplayName})`);
-            // Тут можна додати більш складну логіку керування
-        });
+.window-left {
+    top: 100px;
+    left: 80px;
+}
 
-        // Додаємо новий елемент до першого доступного "placeholder"
-        let added = false;
-        for (const placeholder of itemPlaceholders) {
-            // Перевіряємо, чи є в placeholder вже елементи. Якщо ні, додаємо.
-            // Можна додати більш складну логіку для вибору місця, наприклад, кімнати
-            if (placeholder.children.length === 0) {
-                placeholder.appendChild(newItemDiv);
-                added = true;
-                break;
-            }
-        }
+.window-right {
+    top: 100px;
+    right: 80px;
+}
 
-        if (!added) {
-            alert('Всі місця для пристроїв на цьому поверсі зайняті. Створіть нову кімнату або приберіть існуючі пристрої.');
-            return;
-        }
+.camera-icon {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+    width: 40px;
+    height: 40px;
+    background-color: #555;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 3;
+}
 
-        itemNameInput.value = ''; // Очистити поле введення
-    });
-});
+.camera-icon::after {
+    content: '';
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+/* Анімація для зовнішнього вигляду */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.house-facade.current-floor {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* Поверхи */
+.floor-layout {
+    width: 100%;
+    height: 100%;
+    background-color: #e6e6e6; /* Фон поверху */
+    border-radius: 10px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: none; /* Приховано за замовчуванням */
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-around;
+    align-content: flex-start;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.floor-layout.current-floor {
+    display: flex;
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.floor-layout h2 {
+    width: 100%;
+    text-align: center;
+    color: #28a745;
+    margin-bottom: 30px;
+    font-size: 2em;
+}
+
+.room {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    min-width: 250px;
+    flex: 1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.room h3 {
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.item-placeholder {
+    width: 100%;
+    min-height: 100px;
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #888;
+    font-style: italic;
+    flex-direction: column;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.smart-item {
+    background-color: #c9e6c9; /* Світло-зелений для смарт-речей */
+    border: 1px solid #a7d9a7;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    width: calc(100% - 20px);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    flex-wrap: wrap; /* Додано для контролів штор */
+}
+
+.smart-item button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    background-color: #28a745;
+    color: white;
+}
+
+.smart-item button:hover {
+    background-color: #218838;
+}
+
+/* Стилі для різних типів пристроїв */
+.smart-item.light button { background-color: #ffc107; color: #333; }
+.smart-item.light button:hover { background-color: #e0a800; }
+
+.smart-item.thermostat button { background-color: #17a2b8; }
+.smart-item.thermostat button:hover { background-color: #138496; }
+.smart-item.thermostat .temperature { font-weight: bold; margin-left: 5px; }
+
+.smart-item.speaker button { background-color: #6f42c1; }
+.smart-item.speaker button:hover { background-color: #5a32a0; }
+
+.smart-item.tv button { background-color: #dc3545; }
+.smart-item.tv button:hover { background-color: #c82333; }
+
+.smart-item.motion-sensor { background-color: #f7e6c9; }
+.smart-item.motion-sensor .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.motion-sensor.active .status { color: #28a745; }
+
+.smart-item.smart-lock { background-color: #d1c9e6; }
+.smart-item.smart-lock .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.smart-lock.locked .status { color: #dc3545; }
+.smart-item.smart-lock.unlocked .status { color: #28a745; }
+
+.smart-item.blinds { background-color: #c9e6d8; }
+.smart-item.blinds .blinds-controls button {
+    margin-left: 5px; /* Зменшити відступ між кнопками */
+    margin-top: 5px; /* Для розташування на новому рядку, якщо місця мало */
+    background-color: #6c757d;
+}
+.smart-item.blinds .blinds-controls button:hover { background-color: #5a6268; }
+
+.smart-item.air-purifier { background-color: #e0f2f7; }
+.smart-item.air-purifier .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.air-purifier.on .status { color: #28a745; }
+
+.smart-item.smoke-detector { background-color: #ffe0b2; } /* Помаранчевий */
+.smart-item.smoke-detector .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.smoke-detector.alarm .status { color: #dc3545; } /* Червоний для тривоги */
+
+.smart-item.smart-plug { background-color: #d1c8e6; } /* Фіолетовий */
+.smart-item.smart-plug .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.smart-plug.on .status { color: #28a745; }
+
+.smart-item.robot-vacuum { background-color: #c8e6c9; } /* Сірий */
+.smart-item.robot-vacuum .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.robot-vacuum.cleaning .status { color: #28a745; }
+.smart-item.robot-vacuum.docked .status { color: #17a2b8; }
+
+
+/* Контроли додавання пристроїв */
+.add-item-controls {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.add-item-controls select,
+.add-item-controls input[type="text"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.add-item-controls button {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.add-item-controls button:hover {
+    background-color: #0056b3;
+}
