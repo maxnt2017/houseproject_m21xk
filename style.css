@@ -1,0 +1,368 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7f6;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #28a745;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.house-container {
+    display: flex;
+    flex-grow: 1;
+    padding: 20px;
+    gap: 20px;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.sidebar h2 {
+    color: #28a745;
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.sidebar button {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border: none;
+    background-color: #e0e0e0;
+    color: #333;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.sidebar button:hover {
+    background-color: #d0d0d0;
+    transform: translateY(-2px);
+}
+
+.sidebar button#toggleDoor,
+.sidebar button#toggleCamera,
+.sidebar button#addItem {
+    background-color: #28a745;
+    color: white;
+}
+
+.sidebar button#toggleDoor:hover,
+.sidebar button#toggleCamera:hover,
+.sidebar button#addItem:hover {
+    background-color: #218838;
+}
+
+.camera-feed {
+    margin-top: 20px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    display: none; /* Приховано за замовчуванням */
+    text-align: center;
+}
+
+.camera-feed h3 {
+    margin-top: 0;
+    color: #555;
+    font-size: 1em;
+}
+
+.camera-feed video {
+    width: 100%;
+    max-width: 200px;
+    border-radius: 5px;
+    background-color: black;
+}
+
+.house-view {
+    flex-grow: 1;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    overflow: hidden; /* Для приховування неактивних поверхів */
+    position: relative;
+}
+
+/* Зовнішній вигляд будинку */
+.house-facade {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #a2d9ff, #7ad2ff); /* Небо */
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    flex-direction: column;
+    padding-bottom: 50px; /* Місце для трави */
+    box-sizing: border-box;
+}
+
+.house-facade::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #8bc34a; /* Трава */
+    z-index: 1;
+}
+
+.house-facade .house-name {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #4CAF50;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.door-wrapper {
+    position: relative;
+    width: 120px;
+    height: 180px;
+    background-color: #8b4513; /* Колір дверного отвору */
+    border-radius: 5px;
+    margin-bottom: 20px;
+    z-index: 2;
+    overflow: hidden;
+    border: 5px solid #6a340b;
+}
+
+.door {
+    width: 100%;
+    height: 100%;
+    background-color: #a0522d; /* Колір дверей */
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: left;
+    transition: transform 0.5s ease-out;
+    border-left: 5px solid #8b4513;
+}
+
+.door.open {
+    transform: perspective(1000px) rotateY(-90deg);
+}
+
+.window {
+    position: absolute;
+    width: 80px;
+    height: 100px;
+    background-color: #add8e6; /* Світло-блакитний для вікна */
+    border: 3px solid #6a340b;
+    border-radius: 5px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.window-left {
+    top: 100px;
+    left: 80px;
+}
+
+.window-right {
+    top: 100px;
+    right: 80px;
+}
+
+.camera-icon {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+    width: 40px;
+    height: 40px;
+    background-color: #555;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.camera-icon::after {
+    content: '';
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+/* Анімація для зовнішнього вигляду */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.house-facade.current-floor {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* Поверхи */
+.floor-layout {
+    width: 100%;
+    height: 100%;
+    background-color: #e6e6e6; /* Фон поверху */
+    border-radius: 10px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: none; /* Приховано за замовчуванням */
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-around;
+    align-content: flex-start;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.floor-layout.current-floor {
+    display: flex;
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.floor-layout h2 {
+    width: 100%;
+    text-align: center;
+    color: #28a745;
+    margin-bottom: 30px;
+    font-size: 2em;
+}
+
+.room {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    min-width: 250px;
+    flex: 1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.room h3 {
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.item-placeholder {
+    width: 100%;
+    min-height: 100px;
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #888;
+    font-style: italic;
+    flex-direction: column;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.smart-item {
+    background-color: #c9e6c9; /* Світло-зелений для смарт-речей */
+    border: 1px solid #a7d9a7;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    width: calc(100% - 20px);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+}
+
+.smart-item button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    background-color: #28a745;
+    color: white;
+}
+
+.smart-item button:hover {
+    background-color: #218838;
+}
+
+.smart-item.light button { background-color: #ffc107; color: #333; }
+.smart-item.light button:hover { background-color: #e0a800; }
+
+.smart-item.thermostat button { background-color: #17a2b8; }
+.smart-item.thermostat button:hover { background-color: #138496; }
+
+.smart-item.speaker button { background-color: #6f42c1; }
+.smart-item.speaker button:hover { background-color: #5a32a0; }
+
+.smart-item.tv button { background-color: #dc3545; }
+.smart-item.tv button:hover { background-color: #c82333; }
+
+
+/* Контроли додавання пристроїв */
+.add-item-controls {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.add-item-controls select,
+.add-item-controls input[type="text"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.add-item-controls button {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.add-item-controls button:hover {
+    background-color: #0056b3;
+}
