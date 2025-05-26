@@ -1,0 +1,123 @@
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мій Розумний Будинок</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Мій Розумний Будинок</h1>
+        <p>Керуй своїм простором з легкістю</p>
+    </header>
+
+    <main class="house-container">
+        <div class="sidebar">
+            <h2>Навігація</h2>
+            <button class="nav-button" data-floor="outside">Зовнішній вигляд</button>
+            <button class="nav-button" data-floor="floor1">1 Поверх</button>
+            <button class="nav-button" data-floor="floor2">2 Поверх</button>
+            <button class="nav-button" data-floor="floor3">3 Поверх</button>
+            <button class="nav-button" data-floor="floor4">4 Поверх</button>
+            <button class="nav-button" data-floor="floor5">5 Поверх</button>
+
+            <h2>Керування</h2>
+            <button id="toggleDoor">Відкрити/Закрити Двері</button>
+            <button id="toggleCamera">Увімкнути/Вимкнути Камеру</button>
+            <div class="camera-feed" id="cameraFeed">
+                <h3>Вигляд з Камери</h3>
+                <video autoplay muted loop id="cameraVideo">
+                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                    Ваш браузер не підтримує відео.
+                </video>
+            </div>
+
+            <h2>Додати речі</h2>
+            <div class="add-item-controls">
+                <select id="itemType">
+                    <option value="light">Світло</option>
+                    <option value="thermostat">Термостат</option>
+                    <option value="speaker">Колонка</option>
+                    <option value="tv">Телевізор</option>
+                </select>
+                <input type="text" id="itemName" placeholder="Назва кімнати/пристрою">
+                <button id="addItem">Додати пристрій</button>
+            </div>
+        </div>
+
+        <div class="house-view">
+            <div class="house-facade current-floor" id="outside">
+                <div class="door-wrapper">
+                    <div class="door" id="mainDoor"></div>
+                </div>
+                <div class="window window-left"></div>
+                <div class="window window-right"></div>
+                <div class="camera-icon" id="cameraIcon"></div>
+                <div class="house-name">Мій Дім</div>
+            </div>
+
+            <div class="floor-layout" id="floor1">
+                <h2>1 Поверх - Вітальня</h2>
+                <div class="room living-room">
+                    <h3>Вітальня</h3>
+                    <div class="item-placeholder" data-room="living-room"></div>
+                </div>
+                <div class="room kitchen">
+                    <h3>Кухня</h3>
+                    <div class="item-placeholder" data-room="kitchen"></div>
+                </div>
+            </div>
+
+            <div class="floor-layout" id="floor2">
+                <h2>2 Поверх - Спальня</h2>
+                <div class="room bedroom">
+                    <h3>Спальня</h3>
+                    <div class="item-placeholder" data-room="bedroom"></div>
+                </div>
+                <div class="room bathroom">
+                    <h3>Ванна</h3>
+                    <div class="item-placeholder" data-room="bathroom"></div>
+                </div>
+            </div>
+
+            <div class="floor-layout" id="floor3">
+                <h2>3 Поверх - Офіс</h2>
+                <div class="room office">
+                    <h3>Офіс</h3>
+                    <div class="item-placeholder" data-room="office"></div>
+                </div>
+                <div class="room balcony">
+                    <h3>Балкон</h3>
+                    <div class="item-placeholder" data-room="balcony"></div>
+                </div>
+            </div>
+
+            <div class="floor-layout" id="floor4">
+                <h2>4 Поверх - Дитяча</h2>
+                <div class="room kids-room">
+                    <h3>Дитяча кімната</h3>
+                    <div class="item-placeholder" data-room="kids-room"></div>
+                </div>
+                <div class="room laundry-room">
+                    <h3>Пральня</h3>
+                    <div class="item-placeholder" data-room="laundry-room"></div>
+                </div>
+            </div>
+
+            <div class="floor-layout" id="floor5">
+                <h2>5 Поверх - Тераса</h2>
+                <div class="room terrace">
+                    <h3>Тераса</h3>
+                    <div class="item-placeholder" data-room="terrace"></div>
+                </div>
+                <div class="room storage">
+                    <h3>Комора</h3>
+                    <div class="item-placeholder" data-room="storage"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
