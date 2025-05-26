@@ -113,12 +113,13 @@ header {
     border-radius: 10px;
     position: relative;
     overflow: hidden;
-    display: flex;
+    display: flex; /* Змінено на flex для центрування */
     justify-content: center;
     align-items: flex-end;
     flex-direction: column;
     padding-bottom: 50px; /* Місце для трави */
     box-sizing: border-box;
+    /* display: block; */ /* Повернено до block, якщо flex викликає проблеми */
 }
 
 .house-facade::before {
@@ -305,6 +306,7 @@ header {
     justify-content: space-between;
     align-items: center;
     font-size: 0.9em;
+    flex-wrap: wrap; /* Додано для контролів штор */
 }
 
 .smart-item button {
@@ -321,17 +323,53 @@ header {
     background-color: #218838;
 }
 
+/* Стилі для різних типів пристроїв */
 .smart-item.light button { background-color: #ffc107; color: #333; }
 .smart-item.light button:hover { background-color: #e0a800; }
 
 .smart-item.thermostat button { background-color: #17a2b8; }
 .smart-item.thermostat button:hover { background-color: #138496; }
+.smart-item.thermostat .temperature { font-weight: bold; margin-left: 5px; }
 
 .smart-item.speaker button { background-color: #6f42c1; }
 .smart-item.speaker button:hover { background-color: #5a32a0; }
 
 .smart-item.tv button { background-color: #dc3545; }
 .smart-item.tv button:hover { background-color: #c82333; }
+
+.smart-item.motion-sensor { background-color: #f7e6c9; }
+.smart-item.motion-sensor .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.motion-sensor.active .status { color: #28a745; }
+
+.smart-item.smart-lock { background-color: #d1c9e6; }
+.smart-item.smart-lock .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.smart-lock.locked .status { color: #dc3545; }
+.smart-item.smart-lock.unlocked .status { color: #28a745; }
+
+.smart-item.blinds { background-color: #c9e6d8; }
+.smart-item.blinds .blinds-controls button {
+    margin-left: 5px; /* Зменшити відступ між кнопками */
+    margin-top: 5px; /* Для розташування на новому рядку, якщо місця мало */
+    background-color: #6c757d;
+}
+.smart-item.blinds .blinds-controls button:hover { background-color: #5a6268; }
+
+.smart-item.air-purifier { background-color: #e0f2f7; }
+.smart-item.air-purifier .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.air-purifier.on .status { color: #28a745; }
+
+.smart-item.smoke-detector { background-color: #ffe0b2; } /* Помаранчевий */
+.smart-item.smoke-detector .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.smoke-detector.alarm .status { color: #dc3545; } /* Червоний для тривоги */
+
+.smart-item.smart-plug { background-color: #d1c8e6; } /* Фіолетовий */
+.smart-item.smart-plug .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.smart-plug.on .status { color: #28a745; }
+
+.smart-item.robot-vacuum { background-color: #c8e6c9; } /* Сірий */
+.smart-item.robot-vacuum .status { font-weight: bold; margin-left: 5px; color: #555; }
+.smart-item.robot-vacuum.cleaning .status { color: #28a745; }
+.smart-item.robot-vacuum.docked .status { color: #17a2b8; }
 
 
 /* Контроли додавання пристроїв */
