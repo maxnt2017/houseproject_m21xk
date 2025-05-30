@@ -86,6 +86,37 @@
       margin-top: 10px;
       background-color: #444;
     }
+    .enter-room-button {
+      margin-top: 10px;
+      background-color: #006400;
+    }
+    .room-view {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      z-index: 1000;
+      flex-direction: column;
+    }
+    .room-view-content {
+      background: #2e8b57;
+      padding: 40px;
+      border-radius: 12px;
+      max-width: 600px;
+      text-align: center;
+    }
+    .room-view button {
+      background-color: #ffffff;
+      color: #2e8b57;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -112,6 +143,7 @@
         <input type="text" id="deviceLabel" placeholder="Назва об'єкта або пристрою">
         <button onclick="addSmartDevice()">Додати</button>
         <button class="door-button" onclick="toggleDoor()">Відкрити/Закрити двері</button>
+        <button class="enter-room-button" onclick="enterRoom()">Увійти в кімнату</button>
       </div>
     </div>
 
@@ -122,9 +154,16 @@
     </div>
   </div>
 
+  <div id="roomView" class="room-view" style="display:none">
+    <div class="room-view-content" id="roomViewContent"></div>
+    <button onclick="closeRoomView()">Вийти</button>
+  </div>
+
   <script>
     const houseLayout = document.getElementById('houseLayout');
     const roomSelector = document.getElementById('roomSelector');
+    const roomView = document.getElementById('roomView');
+    const roomViewContent = document.getElementById('roomViewContent');
     let house = null;
 
     function createHouse() {
@@ -186,6 +225,22 @@
           alert(`Двері в кімнату "${roomName}" ${room.classList.contains('door-open') ? 'відкриті' : 'закриті'}.`);
         }
       }
+    }
+
+    function enterRoom() {
+      const roomName = roomSelector.value;
+      if (roomName && house) {
+        const room = [...house.querySelectorAll('.room')].find(r => r.getAttribute('data-room') === roomName);
+        if (room) {
+          const devices = room.querySelectorAll('.device');
+          roomViewContent.innerHTML = `<h2>${roomName}</h2><p>Об'єкти в кімнаті:</p><ul>${[...devices].map(d => `<li>${d.textContent}</li>`).join('')}</ul>`;
+          roomView.style.display = 'flex';
+        }
+      }
+    }
+
+    function closeRoomView() {
+      roomView.style.display = 'none';
     }
 
     function dragDevice(e) {
