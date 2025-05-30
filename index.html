@@ -71,6 +71,9 @@
       border-radius: 5px;
       margin: 2px 0;
       font-size: 14px;
+      cursor: move;
+      user-select: none;
+      position: relative;
     }
   </style>
 </head>
@@ -110,6 +113,8 @@
         room.className = 'room';
         room.setAttribute('data-room', name);
         room.innerHTML = `<strong>${name}</strong><div class="device-list"></div>`;
+        room.ondragover = e => e.preventDefault();
+        room.ondrop = dropDevice;
         houseLayout.appendChild(room);
 
         const option = document.createElement('option');
@@ -130,10 +135,29 @@
           const device = document.createElement('div');
           device.className = 'device';
           device.textContent = label;
+          device.setAttribute('draggable', 'true');
+          device.ondragstart = dragDevice;
           room.querySelector('.device-list').appendChild(device);
           document.getElementById('deviceLabel').value = '';
         }
       }
+    }
+
+    function dragDevice(e) {
+      e.dataTransfer.setData('text/plain', e.target.outerHTML);
+      e.dataTransfer.effectAllowed = 'move';
+      e.target.remove();
+    }
+
+    function dropDevice(e) {
+      e.preventDefault();
+      const data = e.dataTransfer.getData('text/plain');
+      const temp = document.createElement('div');
+      temp.innerHTML = data;
+      const device = temp.firstChild;
+      device.setAttribute('draggable', 'true');
+      device.ondragstart = dragDevice;
+      e.target.querySelector('.device-list').appendChild(device);
     }
 
     function startCamera() {
