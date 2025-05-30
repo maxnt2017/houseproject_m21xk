@@ -40,42 +40,37 @@
     button:hover {
       background-color: #1c751c;
     }
-    input {
+    input, select {
       padding: 8px;
       margin-top: 10px;
       width: 100%;
       box-sizing: border-box;
     }
-    video {
-      width: 100%;
-      max-height: 300px;
-      border-radius: 8px;
+    .widget-builder {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    .house {
+    .house-layout {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .room {
+      background: #f0fff0;
+      border: 2px dashed #228B22;
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 100px;
       position: relative;
-      background: url('https://i.imgur.com/ew8F2RZ.png') no-repeat center center;
-      background-size: contain;
-      height: 400px;
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
     }
-    .device-button {
-      position: absolute;
-      padding: 5px 10px;
-      background-color: rgba(34, 139, 34, 0.8);
-      color: white;
-      border: none;
+    .device {
+      background: #90ee90;
+      padding: 5px;
       border-radius: 5px;
-      cursor: pointer;
-    }
-    .light {
-      top: 20%;
-      left: 30%;
-    }
-    .thermostat {
-      top: 50%;
-      left: 60%;
+      margin: 2px 0;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -86,18 +81,15 @@
 
   <div class="container">
     <div class="card">
-      <h2>Інтерактивна Хата</h2>
-      <div class="house">
-        <button class="device-button light" onclick="toggleLight()">Світло</button>
-        <button class="device-button thermostat" onclick="adjustTemp()">Термостат</button>
+      <h2>Конструктор Хати</h2>
+      <div class="widget-builder">
+        <input type="text" id="roomName" placeholder="Назва кімнати">
+        <button onclick="addRoom()">Додати кімнату</button>
+        <select id="roomSelector"></select>
+        <input type="text" id="deviceLabel" placeholder="Назва розумного пристрою">
+        <button onclick="addSmartDevice()">Додати пристрій до кімнати</button>
       </div>
-    </div>
-
-    <div class="card">
-      <h2>Керування Розумними Речами</h2>
-      <input type="text" id="deviceName" placeholder="Назва нового пристрою">
-      <button onclick="addDevice()">Додати Пристрій</button>
-      <ul id="deviceList"></ul>
+      <div id="houseLayout" class="house-layout"></div>
     </div>
 
     <div class="card">
@@ -108,13 +100,39 @@
   </div>
 
   <script>
-    function addDevice() {
-      const name = document.getElementById('deviceName').value;
+    const houseLayout = document.getElementById('houseLayout');
+    const roomSelector = document.getElementById('roomSelector');
+
+    function addRoom() {
+      const name = document.getElementById('roomName').value;
       if (name) {
-        const li = document.createElement('li');
-        li.textContent = name + ' - Онлайн';
-        document.getElementById('deviceList').appendChild(li);
-        document.getElementById('deviceName').value = '';
+        const room = document.createElement('div');
+        room.className = 'room';
+        room.setAttribute('data-room', name);
+        room.innerHTML = `<strong>${name}</strong><div class="device-list"></div>`;
+        houseLayout.appendChild(room);
+
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        roomSelector.appendChild(option);
+
+        document.getElementById('roomName').value = '';
+      }
+    }
+
+    function addSmartDevice() {
+      const label = document.getElementById('deviceLabel').value;
+      const roomName = roomSelector.value;
+      if (label && roomName) {
+        const room = [...houseLayout.children].find(r => r.getAttribute('data-room') === roomName);
+        if (room) {
+          const device = document.createElement('div');
+          device.className = 'device';
+          device.textContent = label;
+          room.querySelector('.device-list').appendChild(device);
+          document.getElementById('deviceLabel').value = '';
+        }
       }
     }
 
@@ -127,17 +145,6 @@
         .catch(err => {
           alert('Не вдалося отримати доступ до камери: ' + err);
         });
-    }
-
-    function toggleLight() {
-      alert("Світло в будинку увімкнено/вимкнено!");
-    }
-
-    function adjustTemp() {
-      const newTemp = prompt("Введіть нову температуру (°C):", "22");
-      if (newTemp) {
-        alert("Температуру встановлено на " + newTemp + "°C");
-      }
     }
   </script>
 </body>
