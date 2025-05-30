@@ -18,13 +18,15 @@
     }
     .container {
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
     .card {
       background: white;
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       padding: 20px;
-      margin-bottom: 20px;
     }
     button {
       background-color: #228B22;
@@ -49,6 +51,32 @@
       max-height: 300px;
       border-radius: 8px;
     }
+    .house {
+      position: relative;
+      background: url('https://i.imgur.com/ew8F2RZ.png') no-repeat center center;
+      background-size: contain;
+      height: 400px;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .device-button {
+      position: absolute;
+      padding: 5px 10px;
+      background-color: rgba(34, 139, 34, 0.8);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .light {
+      top: 20%;
+      left: 30%;
+    }
+    .thermostat {
+      top: 50%;
+      left: 60%;
+    }
   </style>
 </head>
 <body>
@@ -57,6 +85,14 @@
   </header>
 
   <div class="container">
+    <div class="card">
+      <h2>Інтерактивна Хата</h2>
+      <div class="house">
+        <button class="device-button light" onclick="toggleLight()">Світло</button>
+        <button class="device-button thermostat" onclick="adjustTemp()">Термостат</button>
+      </div>
+    </div>
+
     <div class="card">
       <h2>Керування Розумними Речами</h2>
       <input type="text" id="deviceName" placeholder="Назва нового пристрою">
@@ -91,6 +127,17 @@
         .catch(err => {
           alert('Не вдалося отримати доступ до камери: ' + err);
         });
+    }
+
+    function toggleLight() {
+      alert("Світло в будинку увімкнено/вимкнено!");
+    }
+
+    function adjustTemp() {
+      const newTemp = prompt("Введіть нову температуру (°C):", "22");
+      if (newTemp) {
+        alert("Температуру встановлено на " + newTemp + "°C");
+      }
     }
   </script>
 </body>
